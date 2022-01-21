@@ -1,0 +1,18 @@
+* { margin: 0px; padding: 0px;}
+
+.canvasWithChat{
+    display: grid;
+    grid-template-rows: 100vh 100px;
+    grid-template-columns: 80vw 20vw;
+    grid-gap: 0px;
+    height: 0vh;
+    width: 0vw;
+}
+
+.canvas2D{
+    background: black;
+}
+
+.chatBox{
+    background: blue;
+}

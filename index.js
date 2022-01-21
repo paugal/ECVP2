@@ -1,6 +1,3 @@
-
-//Extension Chrome Smart Websocket Client
-
 var http = require('http');
 var url = require('url');
 
