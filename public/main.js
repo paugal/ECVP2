@@ -30,6 +30,11 @@ var mouse_pos = [0,0];
 var target = [0, 0];
 var position = [0, 0];
 var vel = 0.1;
+var myId = 0;
+
+function setMyId(id){
+    myId = id;
+}
 
 
 function draw() {
@@ -100,7 +105,7 @@ function onMouse( event ) {
     {
         target = [canvasx, canvasy];
         console.log('target set in:', canvasx, ',' , canvasy);
-        console.log(rect);
+        sendMsg(target);
         
     }
     else if(event.type == "mousemove")

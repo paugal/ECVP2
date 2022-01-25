@@ -1,42 +1,16 @@
 var http = require('http');
 var url = require('url');
-
-var server = http.createServer(function(request, response){
-	console.log('REQUEST: ' + request.url);
-	var url_info = url.parse(request.url, true);
-	var pathname = url_info.pathname;
-	var params = url_info.query;
-	response.end('OK!')
-});
-
-server.listen(1337, function(){
-	console.log(`Server started on port ${server.address().port} :)`);
-});
-
-var WebSocketServer = require('websocket').server;
-
-wsServer = new WebSocketServer({
-	httpServer: server
-});
-
-wsServer.on('request', function(request){
-	var connection = request.accept(null, request.origin);
-	console.log('NEW WEBSOCKET USER!!!');
-	connection.sendUTF('welcome!');
-	connection.on('message', function(message){
-		if(message.type === 'utf8'){
-			console.log('NEW MSG: ' + message.utf8Data);
-		}
-	});
-
-	connection.on('close', function(connection){
-		console.log('USER IS GONE')
-	})
-});  
-
-
+const WebSocket = require('websocket');
 var express = require('express');
-var app = express();
+var bodyParser = require('body-parser');
+
+//DATABASE
+const Datastore = require('nedb');
+
+const db = new Datastore('database.db');
+db.loadDatabase();
+
+const app = express();
 
 //to handle static files, redirect to public folder
 app.use(express.static('public'));
@@ -63,7 +37,6 @@ app.listen(3000, function () {
 
 
 //to parse form data inside the request body we need this library
-var bodyParser = require('body-parser')
 app.use( bodyParser.json() ); // to support JSON-encoded bodies
 app.use( bodyParser.urlencoded({extended: true}) ); //unicode
 
@@ -80,6 +53,55 @@ app.get('/news/:user', function (req, res) {
 
 //example of a POST request with parameters inside the body from Form
 app.post('/test', function (req, res) {
- res.send( JSON.stringify(req.body) );
+	console.log(req.body);
+	res.send( JSON.stringify(req.body) );
+	db.insert(req.body);
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+{
+var server = http.createServer(function(request, response){
+	console.log('REQUEST: ' + request.url);
+	var url_info = url.parse(request.url, true);
+	var pathname = url_info.pathname;
+	var params = url_info.query;
+	response.end('OK!')
+});
+
+server.listen(1337, function(){
+	console.log(`Server started on port ${server.address().port} :)`);
+});
+
+wsServer = new WebSocketServer({
+	httpServer: server
+});
+
+wsServer.on('request', function(request){
+	var connection = request.accept(null, request.origin);
+	console.log('NEW WEBSOCKET USER!!!');
+	connection.sendUTF('welcome!');
+	connection.on('message', function(message){
+		if(message.type === 'utf8'){
+			console.log('NEW MSG: ' + message.utf8Data);
+		}
+	});
+
+	connection.on('close', function(connection){
+		console.log('USER IS GONE')
+	})
+});  
+}*/
