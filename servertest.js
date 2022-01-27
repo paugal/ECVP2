@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var ids = 0;
 //DATABASE
 const Datastore = require('nedb');
+const { userInfo } = require('os');
 
 const db = new Datastore('database.db');
 db.loadDatabase();
@@ -16,6 +17,15 @@ msg = [{
     info: 0
     }
 ];
+
+userData = [
+  {
+    type: 'userInfo',
+    id: null,
+    position: { posx: null, posy: null },
+    target: { tarx: null, tary: null }
+  }
+]
 
 const wss = new WebSocket.Server({ server:server });
 
@@ -63,8 +73,6 @@ app.get('/news', function (req, res) {
 
 server.listen(3000, () => console.log(`Lisening on port :3000`));
 
-
-
 //to parse form data inside the request body we need this library
 app.use( bodyParser.json() ); // to support JSON-encoded bodies
 app.use( bodyParser.urlencoded({extended: true}) ); //unicode
@@ -84,5 +92,14 @@ app.get('/news/:user', function (req, res) {
 app.post('/test', function (req, res) {
 	console.log(req.body);
 	res.send( JSON.stringify(req.body) );
+  saveUsersPosition(req.body);
 	db.insert(req.body);
 });
+
+function saveUsersPosition(data){
+  const index = this.userData.findIndex(i => i.id === data.id)
+  if(index > -1){
+    userData.splice(index, 1);
+  }
+  userData.push(data);
+}

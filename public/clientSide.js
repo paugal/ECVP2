@@ -22,15 +22,18 @@ const sendMessage = () => {
 
 function reciveMSG(msg){
     var data = JSON.parse(msg);
-    if(data.type = 'init'){
+    if(data.type == 'init'){
         setMyId(data.info);
+    }
+    else if(data.type == 'allUsersData'){
+        console.log('reciveAllUsers')
+        setActiveUsers(data.content);
     }
 
 }
 
-async function sendMsg(position){
+async function sendMsg(data){
 
-    const data = { var1: position[0], var2: position[1]};
     const options = {
         method: 'POST',
         headers: {
@@ -39,7 +42,8 @@ async function sendMsg(position){
         body: JSON.stringify(data)
     };
 
+    console.log(data)
     const response = await fetch('/test', options);
     const json = await response.json();
-    console.log(json)
+    console.log(json);
 }

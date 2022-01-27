@@ -1,40 +1,74 @@
-var http = require('http');
-var url = require('url');
-const WebSocket = require('websocket');
-var express = require('express');
+const express = require('express')
+const app = express()
+const server = require('http').createServer(app);
+const WebSocket = require('ws');
 var bodyParser = require('body-parser');
 
+var ids = 0;
 //DATABASE
 const Datastore = require('nedb');
+const { userInfo } = require('os');
 
 const db = new Datastore('database.db');
 db.loadDatabase();
 
-const app = express();
+msg = [{
+    type: '',
+    info: 0
+    }
+];
 
-//to handle static files, redirect to public folder
+userData = {
+	type: 'allUsersData',
+	content:[]
+}
+
+
+const wss = new WebSocket.Server({ server:server });
+
+wss.on('connection', function connection(ws) {
+  console.log('A new client Connected!');
+  sendInitMsg(ws);
+  
+
+  ws.on('message', function incoming(message) {
+    console.log('received: %s', message);
+
+    wss.clients.forEach(function each(client) {
+      if (client !== ws && client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+    
+  });
+});
+
+function sendInitMsg(ws){
+    msg = {type: 'init', info: ids}
+    var data = JSON.stringify(msg);
+    ids++;
+    ws.send(data);
+}
+
 app.use(express.static('public'));
+
 
 //to handle request of type GET to path '/'
 app.get('/', function (req, res) {
-  res.send('Hello World!');
+    res.send('Hello World!');
 });
 
 //use all instead of get to accept any request type
 app.all('/news', function (req, res) {
-  res.send('Hello World!');
+    res.send('Hello World!');
 });
 
 //to send manually a file (you can use the public folder)
 app.get('/news', function (req, res) {
- res.sendFile( 'data/news.json', { root: __dirname });
+    res.sendFile( 'data/news.json', { root: __dirname });
 });
 
-//to launch
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!');
-});
-
+server.listen(3000, () => console.log(`Lisening on port :3000`));
 
 //to parse form data inside the request body we need this library
 app.use( bodyParser.json() ); // to support JSON-encoded bodies
@@ -54,54 +88,14 @@ app.get('/news/:user', function (req, res) {
 //example of a POST request with parameters inside the body from Form
 app.post('/test', function (req, res) {
 	console.log(req.body);
-	res.send( JSON.stringify(req.body) );
-	db.insert(req.body);
+  	saveUsersPosition(req.body);
+	res.send( JSON.stringify(userData) );
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-{
-var server = http.createServer(function(request, response){
-	console.log('REQUEST: ' + request.url);
-	var url_info = url.parse(request.url, true);
-	var pathname = url_info.pathname;
-	var params = url_info.query;
-	response.end('OK!')
-});
-
-server.listen(1337, function(){
-	console.log(`Server started on port ${server.address().port} :)`);
-});
-
-wsServer = new WebSocketServer({
-	httpServer: server
-});
-
-wsServer.on('request', function(request){
-	var connection = request.accept(null, request.origin);
-	console.log('NEW WEBSOCKET USER!!!');
-	connection.sendUTF('welcome!');
-	connection.on('message', function(message){
-		if(message.type === 'utf8'){
-			console.log('NEW MSG: ' + message.utf8Data);
-		}
-	});
-
-	connection.on('close', function(connection){
-		console.log('USER IS GONE')
-	})
-});  
-}*/
+function saveUsersPosition(data){
+  const index = userData.content.findIndex(i => i.id === data.id)
+  if(index > -1){
+    userData.content.splice(index, 1);
+  }
+  userData.content.push(data);
+}

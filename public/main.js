@@ -1,13 +1,10 @@
 //fondos https://craftpix.net/freebies/free-pixel-art-street-2d-backgrounds/
 
-function init() {
-    window.requestAnimationFrame(draw);
-}
 
+  
+function init() { window.requestAnimationFrame(draw); }
 init();
-
 var last = performance.now();
-
 function loop()
 {
    drawScene();
@@ -26,20 +23,44 @@ function loop()
    //request to call loop() again before next frame
    requestAnimationFrame( loop );
 }
+
 var mouse_pos = [0,0];
 var target = [0, 0];
 var position = [0, 0];
 var vel = 0.1;
 var myId = 0;
 
-function setMyId(id){
-    myId = id;
+userInfo = {
+    type: 'userInfo',
+    id: null,
+    position: { posx: 0, posy: 0 },
+    target: { tarx: null, tary: null }
 }
 
+activeUsers = null;
+
+usersDisplayInfo = [];
+
+function setMyId(id){
+    myId = id;
+    userInfo.id = id;
+}
+
+function setActiveUsers(dataUsers){
+    activeUsers = dataUsers;
+    displayUsersInfo();
+}
+
+function loadActiveUsers(data){
+    
+}
+
+function displayUsersInfo(){
+    //activeUsers.content.
+}
 
 function draw() {
     var canvas = document.getElementById('canvas');
-    //Canvas Resize
     var parent = canvas.parentNode;
 	var rect = parent.getBoundingClientRect();
 	canvas.width = rect.width;
@@ -47,24 +68,13 @@ function draw() {
     
     var ctx = canvas.getContext('2d');
     ctx.clearRect(0,0,canvas.width, canvas.height);
-    position[0] = lerp(position[0], target[0], vel);
-    position[1] = lerp(position[1], target[1], vel);
+    userInfo.position.posx = lerp(userInfo.position.posx, userInfo.target.tarx, vel);
+    userInfo.position.posy = lerp(userInfo.position.posy, userInfo.target.tary, vel);
     var square = new Path2D();
-    square.rect(position[0], position[1], 10, 10);
+    square.rect(userInfo.position.posx, userInfo.position.posy, 10, 10);
     ctx.stroke(square);
-
-    
-
-    //draw an image
-    //ctx.drawImage( img, 100, 100);
-        /*
-    var background = new Image();
-    background.src = "https://i.ibb.co/svpyZXM/City4.png";
-    ctx.drawImage(background,0,0, 1000, 300);   
-    */
     window.requestAnimationFrame(draw);
 }
-
 
 //maps a value from one domain to another
 function map_range( value, low1, high1, low2, high2) {
@@ -73,25 +83,15 @@ function map_range( value, low1, high1, low2, high2) {
     return low2 + range2 * (value - low1) / range1;
 }
 
-
-
 //ANIMATE THE MOVEMENT
-
 //linear interpolation between two values
 function lerp(a,b,f)
 {
 	return a * (1-f) + b * f;
 }
 
-//in your loop
-//user.pos[0] = lerp( user.pos[0], user.target_pos[0], 0.01 );
-
-
 //LOCAL MOUSE
-
-
 function onMouse( event ) { 
-
     var rect = canvas.getBoundingClientRect();
     var canvasx = mouse_pos[0] = event.clientX - rect.left;
     var canvasy = mouse_pos[1] = event.clientY - rect.top;
@@ -105,7 +105,9 @@ function onMouse( event ) {
     {
         target = [canvasx, canvasy];
         console.log('target set in:', canvasx, ',' , canvasy);
-        sendMsg(target);
+        userInfo.target.tarx = canvasx;
+        userInfo.target.tary = canvasy;
+        sendMsg(userInfo);
         
     }
     else if(event.type == "mousemove")
