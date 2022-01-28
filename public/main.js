@@ -9,7 +9,12 @@ var userInfo = null;
 activeUsers = null;
 usersDisplayInfo = [];
 distFromMe = [];
+var server = null;
+var canvas = null;
 
+var server = new ClientSide();
+
+window.onbeforeunload = ClientSide.leaveChat(myId);
 
 function updatePosition(){
     lastPos = [userInfo.position.posx, userInfo.position.posy]
@@ -37,7 +42,6 @@ function twoPointsDist(x1, y1, x2, y2){
 }
 
 function draw() {
-    var canvas = document.getElementById('canvas');
     var parent = canvas.parentNode;
 	var rect = parent.getBoundingClientRect();
 	canvas.width = rect.width;
@@ -148,8 +152,12 @@ function onMouse( event ) {
     {
     }
 };
+window.onload = function(){
+    const canvasBox = document.getElementById('canvasBox');
+    canvas = canvasBox;
+    canvasBox.addEventListener("mousemove", onMouse );
+    canvasBox.addEventListener("mousedown", onMouse );
+    canvasBox.addEventListener("mouseup", onMouse );
+}
 
-document.addEventListener("mousemove", onMouse );
-document.addEventListener("mousedown", onMouse );
-document.addEventListener("mouseup", onMouse );
 
