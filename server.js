@@ -18,10 +18,16 @@ msg = [{
     }
 ];
 
-userData = {
+usersData = {
 	type: 'allUsersData',
 	content:[]
 }
+
+onlineUser = {
+	type: 'OnlineUsersData',
+	content:[]
+}
+
 
 
 const wss = new WebSocket.Server({ server:server });
@@ -44,7 +50,7 @@ wss.on('connection', function connection(ws) {
 });
 
 function sendInitMsg(ws){
-    msg = {type: 'init', info: ids, usersInfo: userData.content}
+    msg = {type: 'init', info: ids, usersInfo: onlineUser.content}
     var data = JSON.stringify(msg);
     ids++;
     ws.send(data);
@@ -87,15 +93,50 @@ app.get('/news/:user', function (req, res) {
 
 //example of a POST request with parameters inside the body from Form
 app.post('/test', function (req, res) {
-	//console.log(req.body);
-  	saveUsersPosition(req.body);
-	  res.send( JSON.stringify(userData) );
+	  //console.log(req.body);
+    if(req.body.type == 'userInfo'){
+      saveUsersPosition(req.body);
+    }
+    else if(req.body.type == 'leave'){
+      console.log('User ' + req.body.id + ' is disconected')
+      delOfflineUser(req.body.id)
+    }
+    else if(req.body.type == 'setActive'){
+      console.log('User ' + req.body.content.id + ' is conected')
+      addOnlineUser(req.body.content.id);
+    }
+  	
+	  res.send( JSON.stringify(onlineUser) );
 });
 
 function saveUsersPosition(data){
-  const index = userData.content.findIndex(i => i.id === data.id)
+  //const index = usersData.content.findIndex(i => i.id === data.id)
+  const index = onlineUser.content.findIndex(i => i.id === data.id)
   if(index > -1){
-    userData.content.splice(index, 1);
+    onlineUser.content.splice(index, 1);
   }
-  userData.content.push(data);
+  onlineUser.content.push(data);
+}
+
+function delOfflineUser(data){
+  const index = onlineUser.content.findIndex(i => i.id === data)
+  if(index > -1){
+    usersData.content.push(onlineUser.content[index])
+    onlineUser.content.splice(index, 1);
+    console.log(usersData)
+    console.log(onlineUser)
+  }
+
+}
+
+function addOnlineUser(data){
+  const index = usersData.content.findIndex(i => i.id === data)
+  
+  if(index > -1){
+    onlineUser.content.push(usersData.content[index])
+    usersData.content.splice(index, 1);
+    console.log(usersData)
+    console.log(onlineUser)
+    db.insert(usersData.content)
+  }
 }

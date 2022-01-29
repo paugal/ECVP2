@@ -6,21 +6,30 @@ const size = 10;
 var myId = 0;
 var voiceRange = 100;
 var userInfo = null;
-activeUsers = null;
-usersDisplayInfo = [];
-distFromMe = [];
 var server = null;
 var canvas = null;
 
-var server = new ClientSide();
-
-window.onbeforeunload = ClientSide.leaveChat(myId);
+activeUsers = null;
+usersDisplayInfo = [];
+distFromMe = [];
 
 function updatePosition(){
     lastPos = [userInfo.position.posx, userInfo.position.posy]
     userInfo.position.posx = Math.round(lerp(userInfo.position.posx, userInfo.target.tarx, vel));
     userInfo.position.posy = Math.round(lerp(userInfo.position.posy, userInfo.target.tary, vel));
     sendMsg(userInfo);
+}
+
+function leaveChat(){
+    if(myId != null){
+        var leaveMsg = {type: 'leave', id: myId};
+        sendMsg(leaveMsg);
+    }
+}
+
+function inputUsername(){
+    var username = document.getElementById('inputUsername').value
+    userInfo.id = parseInt(username);
 }
 
 function calDistance(){
@@ -76,15 +85,22 @@ function setMyUser(data){
     userInfo = {
         type: 'userInfo',
         id: data.info,
+        username: null,
         position: { posx: 0, posy: 0 },
         target: { tarx: 0, tary: 0 },
         dist: 0
     }
     setActiveUsers(data.usersInfo);
-    
+    setMyUsername(null);
+}
+
+function setMyUsername(data){
+    userInfo.username = data;
+    sendMsg({type:'setActive', content: userInfo});
 }
 
 function setActiveUsers(dataUsers){
+    //console.log(dataUsers)
     activeUsers = dataUsers;
     loadActiveUsers(dataUsers);
 }
@@ -159,5 +175,9 @@ window.onload = function(){
     canvasBox.addEventListener("mousedown", onMouse );
     canvasBox.addEventListener("mouseup", onMouse );
 }
+
+window.addEventListener("beforeunload", function (event) {
+    leaveChat();
+  });
 
 

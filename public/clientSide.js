@@ -4,7 +4,6 @@ this.location_server = "ws://localhost:3000";
 this.socket = new WebSocket(this.location_server);
 
 
-
 // Connection opened
 this.socket.addEventListener('open', function (event) {
     console.log('Connected to WS Server')
@@ -26,8 +25,12 @@ function reciveMSG(msg){
     if(data.type == 'init'){
         setMyUser(data);
     }
-    else if(data.type == 'allUsersData'){
-        //console.log('reciveAllUsers')
+    else if(data.type == 'setActive'){
+        //Provisional, falta añadir usersnames
+        //demomento añadimos esta funcion en setMyUser
+        setMyUsername(data);
+    }
+    else if(data.type == 'OnlineUsersData'){
         setActiveUsers(data.content);
     }
 
@@ -51,11 +54,3 @@ async function sendMsg(data){
 }
 
 
-function leaveChat(){
-
-    var leaveMsg = JSON.stringify({type: 'leave', id: userInfo.id});
-    socket.send(leaveMSG);
-}
-
-
-//window.onbeforeunload(leaveChat());
